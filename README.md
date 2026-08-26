@@ -64,9 +64,13 @@ todo list --completed
 Example output:
 
 ```text
-1. [ ] Learn Go
-2. [ ] Finish Todo Go       Due: 2026-08-30
-3. [x] Learn interfaces
++----+---------+------------------+------------+------------------+------------------+
+| ID | STATUS  | TITLE            | DUE        | CREATED          | COMPLETED        |
++----+---------+------------------+------------+------------------+------------------+
+| 1  | Pending | Learn Go         | -          | 2026-08-25 09:00 | -                |
+| 2  | Pending | Finish Todo Go   | 2026-08-30 | 2026-08-25 09:05 | -                |
+| 3  | Done    | Learn interfaces | -          | 2026-08-25 09:10 | 2026-08-25 10:30 |
++----+---------+------------------+------------+------------------+------------------+
 ```
 
 ### Complete a Task
@@ -230,88 +234,6 @@ During development:
 ```bash
 go run . list
 ```
-
-## Cross-Platform Builds
-
-Go can cross-compile the CLI for another operating system and processor. The
-target is selected with these environment variables:
-
-- `GOOS`: operating system (`windows`, `linux`, or `darwin` for macOS)
-- `GOARCH`: processor architecture (`amd64` or `arm64`)
-
-This project uses only the Go standard library, so CGO can be disabled for
-portable cross-platform builds.
-
-### Build All Targets from Windows PowerShell
-
-Run the following commands from the project directory:
-
-```powershell
-New-Item -ItemType Directory -Force dist | Out-Null
-
-$env:CGO_ENABLED = "0"
-
-$env:GOOS = "windows"
-$env:GOARCH = "amd64"
-go build -o dist/todo-windows-amd64.exe .
-
-$env:GOOS = "windows"
-$env:GOARCH = "arm64"
-go build -o dist/todo-windows-arm64.exe .
-
-$env:GOOS = "linux"
-$env:GOARCH = "amd64"
-go build -o dist/todo-linux-amd64 .
-
-$env:GOOS = "linux"
-$env:GOARCH = "arm64"
-go build -o dist/todo-linux-arm64 .
-
-$env:GOOS = "darwin"
-$env:GOARCH = "amd64"
-go build -o dist/todo-macos-intel .
-
-$env:GOOS = "darwin"
-$env:GOARCH = "arm64"
-go build -o dist/todo-macos-apple-silicon .
-
-Remove-Item Env:GOOS
-Remove-Item Env:GOARCH
-Remove-Item Env:CGO_ENABLED
-```
-
-The compiled programs are written to the `dist` directory:
-
-| Target | Output |
-| --- | --- |
-| Windows x64 | `dist/todo-windows-amd64.exe` |
-| Windows ARM64 | `dist/todo-windows-arm64.exe` |
-| Linux x64 | `dist/todo-linux-amd64` |
-| Linux ARM64 | `dist/todo-linux-arm64` |
-| macOS Intel | `dist/todo-macos-intel` |
-| macOS Apple silicon | `dist/todo-macos-apple-silicon` |
-
-### Build from Linux or macOS
-
-In Bash or Zsh, environment variables can be set for each build command:
-
-```bash
-mkdir -p dist
-
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o dist/todo-windows-amd64.exe .
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/todo-linux-amd64 .
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/todo-macos-intel .
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o dist/todo-macos-apple-silicon .
-```
-
-To display every target supported by the installed Go toolchain:
-
-```bash
-go tool dist list
-```
-
-Cross-compiling creates the macOS binaries, but public distribution may also
-require code signing and notarization on macOS.
 
 ## Project Goals
 
