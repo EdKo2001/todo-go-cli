@@ -2,8 +2,7 @@
 
 A simple command-line todo application built with Go.
 
-Todo Go is a personal project for practicing core Go concepts while
-building a useful CLI application.
+Todo Go is a personal project for practicing core Go concepts while building a useful CLI application.
 
 ## Features
 
@@ -159,33 +158,6 @@ Example output:
 Todo Go v1.0.0
 ```
 
-## Command Reference
-
-Command Description
-
----
-
-`add <title>` Add a new task
-`list` List active tasks
-`done <id>` Mark a task as completed
-`edit <id> <new-title>` Edit an existing task
-`delete <id>` Delete a task
-`clear` Clear all tasks
-`help` Display help
-`version` Display the current version
-
-## Flags
-
-Flag Command Description
-
----
-
-`--due <date>` `add` Set a due date
-`--all` `list` Show all tasks
-`--completed` `list` Show completed tasks
-`-h`, `--help` Global Display help
-`-v`, `--version` Global Display version
-
 ## Task Model
 
 ```go
@@ -211,8 +183,7 @@ todo-go-cli/
 ## Storage
 
 Tasks are stored locally so they remain available after the CLI exits.
-The application serializes task data to JSON and loads it again when the
-application starts.
+The application serializes task data to JSON and loads it again when the application starts.
 
 Example:
 
@@ -260,10 +231,91 @@ During development:
 go run . list
 ```
 
+## Cross-Platform Builds
+
+Go can cross-compile the CLI for another operating system and processor. The
+target is selected with these environment variables:
+
+- `GOOS`: operating system (`windows`, `linux`, or `darwin` for macOS)
+- `GOARCH`: processor architecture (`amd64` or `arm64`)
+
+This project uses only the Go standard library, so CGO can be disabled for
+portable cross-platform builds.
+
+### Build All Targets from Windows PowerShell
+
+Run the following commands from the project directory:
+
+```powershell
+New-Item -ItemType Directory -Force dist | Out-Null
+
+$env:CGO_ENABLED = "0"
+
+$env:GOOS = "windows"
+$env:GOARCH = "amd64"
+go build -o dist/todo-windows-amd64.exe .
+
+$env:GOOS = "windows"
+$env:GOARCH = "arm64"
+go build -o dist/todo-windows-arm64.exe .
+
+$env:GOOS = "linux"
+$env:GOARCH = "amd64"
+go build -o dist/todo-linux-amd64 .
+
+$env:GOOS = "linux"
+$env:GOARCH = "arm64"
+go build -o dist/todo-linux-arm64 .
+
+$env:GOOS = "darwin"
+$env:GOARCH = "amd64"
+go build -o dist/todo-macos-intel .
+
+$env:GOOS = "darwin"
+$env:GOARCH = "arm64"
+go build -o dist/todo-macos-apple-silicon .
+
+Remove-Item Env:GOOS
+Remove-Item Env:GOARCH
+Remove-Item Env:CGO_ENABLED
+```
+
+The compiled programs are written to the `dist` directory:
+
+| Target | Output |
+| --- | --- |
+| Windows x64 | `dist/todo-windows-amd64.exe` |
+| Windows ARM64 | `dist/todo-windows-arm64.exe` |
+| Linux x64 | `dist/todo-linux-amd64` |
+| Linux ARM64 | `dist/todo-linux-arm64` |
+| macOS Intel | `dist/todo-macos-intel` |
+| macOS Apple silicon | `dist/todo-macos-apple-silicon` |
+
+### Build from Linux or macOS
+
+In Bash or Zsh, environment variables can be set for each build command:
+
+```bash
+mkdir -p dist
+
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o dist/todo-windows-amd64.exe .
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/todo-linux-amd64 .
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/todo-macos-intel .
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o dist/todo-macos-apple-silicon .
+```
+
+To display every target supported by the installed Go toolchain:
+
+```bash
+go tool dist list
+```
+
+Cross-compiling creates the macOS binaries, but public distribution may also
+require code signing and notarization on macOS.
+
 ## Project Goals
 
-Todo Go is designed as a hands-on project for learning and practicing Go
-concepts, including:
+Todo Go is designed as a hands-on project for learning and practicing Go concepts, including:
 
 - Structs
 - Methods
@@ -279,8 +331,6 @@ concepts, including:
 - Testing
 
 ## Status
-
-🚧 **Work in progress**
 
 Todo Go is currently being developed as a Go learning project.
 

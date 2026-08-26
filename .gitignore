@@ -24,6 +24,11 @@ profile.cov
 go.work
 go.work.sum
 
+# Local application data and build output
+/todos.json
+/dist/
+/todo
+
 # env file
 .env
 
