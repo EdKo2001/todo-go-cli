@@ -8,9 +8,7 @@ import (
 
 const version = "1.0.0"
 
-// RunCommand parses and executes a command. It reports whether the todo list
-// changed so main can avoid rewriting storage for read-only commands.
-func RunCommand(args []string, todos *Todos) (bool, error) {
+func Execute(args []string, todos *Todos) (bool, error) {
 	if len(args) == 0 {
 		printHelp()
 		return false, fmt.Errorf("requires at least one command")
@@ -97,10 +95,12 @@ func runEdit(args []string, todos *Todos) (bool, error) {
 	if len(args) < 2 {
 		return false, fmt.Errorf("usage: todo edit <id> <new-title>")
 	}
+
 	index, err := findTodoIndex(args[0], todos)
 	if err != nil {
 		return false, err
 	}
+
 	(*todos)[index].Title = strings.Join(args[1:], " ")
 	fmt.Printf("Edited todo %d\n", (*todos)[index].ID)
 	return true, nil
@@ -111,6 +111,7 @@ func runDelete(args []string, todos *Todos) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	id := (*todos)[index].ID
 	if err := todos.Delete(index); err != nil {
 		return false, err
@@ -131,11 +132,13 @@ func findTodoIndex(value string, todos *Todos) (int, error) {
 	if err != nil || id < 1 {
 		return -1, fmt.Errorf("invalid todo ID %q", value)
 	}
+
 	for index := range *todos {
 		if (*todos)[index].ID == id {
 			return index, nil
 		}
 	}
+
 	return -1, fmt.Errorf("todo %d not found", id)
 }
 

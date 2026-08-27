@@ -6,18 +6,13 @@ Todo Go is a personal project for practicing core Go concepts while building a u
 
 ## Features
 
-- Add tasks
-- Add optional due dates
-- List active tasks
-- List completed tasks
-- List all tasks
+- Add tasks with optional due dates
+- List all saved tasks in a table
 - Mark tasks as completed
-- Edit existing tasks
-- Delete tasks
+- Edit and delete tasks
 - Clear all tasks
-- Persistent local storage
-- Help command
-- Version command
+- Store tasks locally in JSON
+- Help and version commands
 
 ## Usage
 
@@ -29,36 +24,19 @@ todo <command> [arguments] [flags]
 
 ### Add a Task
 
-Add a new task:
-
 ```bash
 todo add "Learn Go"
-```
-
-Add a task with a due date:
-
-```bash
 todo add "Finish Todo Go" --due 2026-08-30
 ```
 
+The due date is stored as entered. The CLI does not currently validate its format.
+
 ### List Tasks
 
-Show active tasks:
+Display all saved tasks:
 
 ```bash
 todo list
-```
-
-Show all tasks:
-
-```bash
-todo list --all
-```
-
-Show only completed tasks:
-
-```bash
-todo list --completed
 ```
 
 Example output:
@@ -71,6 +49,12 @@ Example output:
 | 2  | Pending | Finish Todo Go   | 2026-08-30 | 2026-08-25 09:05 | -                |
 | 3  | Done    | Learn interfaces | -          | 2026-08-25 09:10 | 2026-08-25 10:30 |
 +----+---------+------------------+------------+------------------+------------------+
+```
+
+When there are no tasks, the command prints:
+
+```text
+No todos so far. Use `todo add <title>` to create one.
 ```
 
 ### Complete a Task
@@ -99,8 +83,6 @@ todo clear
 
 ### Help
 
-Display the help menu using any of the following:
-
 ```bash
 todo help
 todo -h
@@ -110,42 +92,31 @@ todo --help
 Output:
 
 ```text
-Todo Go — a simple command-line task manager.
+Todo Go - a simple command-line task manager.
 
 Usage:
   todo <command> [arguments] [flags]
 
-Commands:
+Available Commands:
   add <title>             Add a new task
-  list                    List active tasks
+  list                    List tasks
   done <id>               Mark a task as completed
-  edit <id> <new-title>   Edit an existing task
+  edit <id> <new-title>   Edit a task
   delete <id>             Delete a task
-  clear                   Clear all tasks
+  clear                   Delete all tasks
   help                    Show help
   version                 Show version
 
 Flags:
-  add:
-    --due <date>           Set a due date (YYYY-MM-DD)
-
-  list:
-    --all                  Show all tasks
-    --completed            Show completed tasks
-
-Global:
-  -h, --help               Show help
-  -v, --version            Show version
+  --due <date>            Set a due date when adding a task
+  -h, --help              Show help
+  -v, --version           Show version
 
 Examples:
   todo add "Learn Go"
   todo add "Finish CLI" --due 2026-08-30
   todo list
-  todo list --completed
-  todo list --all
-  todo done 2
-  todo edit 2 "Finish Todo Go CLI"
-  todo delete 2
+  todo done 1
 ```
 
 ### Version
@@ -156,54 +127,71 @@ todo -v
 todo --version
 ```
 
-Example output:
+Output:
 
 ```text
-Todo Go v1.0.0
+1.0.0
 ```
 
 ## Task Model
 
 ```go
 type Todo struct {
-    ID        int
-    Title     string
-    Completed bool
-    Due       string
+    ID          int
+    Title       string
+    Completed   bool
+    Due         string
+    CreateAt    time.Time
+    CompletedAt *time.Time
 }
 ```
+
+`CompletedAt` is `nil` until the task is completed.
 
 ## Project Structure
 
 ```text
 todo-go-cli/
-├── go.mod
-├── main.go
-├── todo.go
-├── storage.go
-└── README.md
+├── .gitignore
+├── LICENSE
+├── README.md
+├── command/
+│   ├── command.go
+│   ├── main.go
+│   ├── storage.go
+│   └── todo.go
+├── flag-practice/
+│   ├── README.md
+│   └── main.go
+└── go.mod
 ```
+
+The current manual command parser is a standalone program in `command/`.
+The repository root is reserved for the future Cobra version.
 
 ## Storage
 
-Tasks are stored locally so they remain available after the CLI exits.
-The application serializes task data to JSON and loads it again when the application starts.
+Tasks are loaded from and saved to `todos.json` in the current directory. The file is created after a command changes the task list.
 
 Example:
 
 ```json
 [
   {
-    "id": 1,
-    "title": "Learn Go",
-    "completed": false,
-    "due": ""
+    "ID": 1,
+    "Title": "Learn Go",
+    "Completed": false,
+    "Due": "",
+    "CreateAt": "2026-08-25T09:00:00-05:00",
+    "CompletedAt": null
   },
   {
-    "id": 2,
-    "title": "Finish Todo Go",
-    "completed": false,
-    "due": "2026-08-30"
+    "ID": 2,
+    "Title": "Finish Todo Go",
+    "Completed": true,
+    "Due": "2026-08-30",
+    "CreateAt": "2026-08-25T09:05:00-05:00",
+    "CompletedAt": "2026-08-25T10:30:00-05:00"
   }
 ]
 ```
@@ -213,44 +201,32 @@ Example:
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/EdKo2001/todo-go-cli.git
 cd todo-go-cli
 ```
 
-Build the application:
+Build and run the application:
 
 ```bash
-go build -o todo
-```
-
-Run it:
-
-```bash
+go build -o todo ./command
 ./todo help
 ```
 
 During development:
 
 ```bash
-go run . list
+go run ./command list
 ```
 
 ## Project Goals
 
-Todo Go is designed as a hands-on project for learning and practicing Go concepts, including:
+Todo Go is designed for learning and practicing:
 
-- Structs
-- Methods
-- Interfaces
-- Pointers
-- Slices and maps
-- Packages
-- Command-line arguments
-- Flags
-- File I/O
-- JSON serialization
+- Structs and methods
+- Pointers and slices
+- Command-line arguments and flags
+- File I/O and JSON serialization
 - Error handling
-- Testing
 
 ## Status
 

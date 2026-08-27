@@ -14,7 +14,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	changed, err := RunCommand(os.Args[1:], &todos)
+	arguments := os.Args[1:]
+	changed, err := Execute(arguments, &todos)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
