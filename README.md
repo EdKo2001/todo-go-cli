@@ -1,6 +1,6 @@
 # Todo Go CLI
 
-A simple command-line todo application built with Go.
+A simple command-line todo application built with Go and Cobra.
 
 Todo Go is a personal project for practicing core Go concepts while building a useful CLI application.
 
@@ -13,6 +13,7 @@ Todo Go is a personal project for practicing core Go concepts while building a u
 - Clear all tasks
 - Store tasks locally in JSON
 - Help and version commands
+- Automatically generated command help and shell completion
 
 ## Usage
 
@@ -33,13 +34,20 @@ The due date is stored as entered. The CLI does not currently validate its forma
 
 ### List Tasks
 
-Display all saved tasks:
+Display active tasks:
 
 ```bash
 todo list
 ```
 
-Example output:
+Display all tasks or only completed tasks:
+
+```bash
+todo list --all
+todo list --completed
+```
+
+Example `todo list --all` output:
 
 ```text
 +----+---------+------------------+------------+------------------+------------------+
@@ -54,7 +62,7 @@ Example output:
 When there are no tasks, the command prints:
 
 ```text
-No todos so far. Use `todo add <title>` to create one.
+No todos found.
 ```
 
 ### Complete a Task
@@ -92,39 +100,32 @@ todo --help
 Output:
 
 ```text
-Todo Go - a simple command-line task manager.
+A simple command-line todo application
 
 Usage:
-  todo <command> [arguments] [flags]
+  todo [command]
 
 Available Commands:
-  add <title>             Add a new task
-  list                    List tasks
-  done <id>               Mark a task as completed
-  edit <id> <new-title>   Edit a task
-  delete <id>             Delete a task
-  clear                   Delete all tasks
-  help                    Show help
-  version                 Show version
+  add         Add a new todo item
+  clear       Clear all todo items
+  completion  Generate the autocompletion script for the specified shell
+  delete      Delete a todo item
+  done        Mark a todo item as completed
+  edit        Edit a todo item
+  help        Help about any command
+  list        List todo items
+  version     Show the current version
 
 Flags:
-  --due <date>            Set a due date when adding a task
-  -h, --help              Show help
-  -v, --version           Show version
+  -h, --help   help for todo
 
-Examples:
-  todo add "Learn Go"
-  todo add "Finish CLI" --due 2026-08-30
-  todo list
-  todo done 1
+Use "todo [command] --help" for more information about a command.
 ```
 
 ### Version
 
 ```bash
 todo version
-todo -v
-todo --version
 ```
 
 Output:
@@ -155,7 +156,24 @@ todo-go-cli/
 ├── .gitignore
 ├── LICENSE
 ├── README.md
+├── cmd/
+│   ├── add.go
+│   ├── clear.go
+│   ├── commands_test.go
+│   ├── delete.go
+│   ├── done.go
+│   ├── edit.go
+│   ├── id.go
+│   ├── list.go
+│   ├── root.go
+│   ├── storage.go
+│   ├── storage_test.go
+│   ├── table.go
+│   ├── todo.go
+│   ├── todo_test.go
+│   └── version.go
 ├── command/
+│   ├── README.md
 │   ├── command.go
 │   ├── main.go
 │   ├── storage.go
@@ -163,11 +181,14 @@ todo-go-cli/
 ├── flag-practice/
 │   ├── README.md
 │   └── main.go
-└── go.mod
+├── go.mod
+├── go.sum
+└── main.go
 ```
 
-The current manual command parser is a standalone program in `command/`.
-The repository root is reserved for the future Cobra version.
+The Cobra implementation starts in `main.go`, with its commands, model, table,
+and storage helpers separated under `cmd/`. The original manual parser remains
+available as a standalone learning example in `command/`.
 
 ## Storage
 
@@ -208,11 +229,17 @@ cd todo-go-cli
 Build and run the application:
 
 ```bash
-go build -o todo ./command
+go build -o todo .
 ./todo help
 ```
 
 During development:
+
+```bash
+go run . list
+```
+
+Run the archived manual implementation with:
 
 ```bash
 go run ./command list
@@ -225,6 +252,7 @@ Todo Go is designed for learning and practicing:
 - Structs and methods
 - Pointers and slices
 - Command-line arguments and flags
+- Cobra commands and command-specific flags
 - File I/O and JSON serialization
 - Error handling
 
