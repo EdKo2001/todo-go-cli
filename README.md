@@ -153,46 +153,52 @@ type Todo struct {
 
 ```text
 todo-go-cli/
-├── .gitignore
-├── LICENSE
-├── README.md
-├── cmd/
-│   ├── add.go
-│   ├── clear.go
-│   ├── commands_test.go
-│   ├── delete.go
-│   ├── done.go
-│   ├── edit.go
-│   ├── id.go
-│   ├── list.go
-│   ├── root.go
-│   ├── storage.go
-│   ├── storage_test.go
-│   ├── table.go
-│   ├── todo.go
-│   ├── todo_test.go
-│   └── version.go
-├── command/
-│   ├── README.md
-│   ├── command.go
-│   ├── main.go
-│   ├── storage.go
-│   └── todo.go
-├── flag-practice/
-│   ├── README.md
-│   └── main.go
-├── go.mod
-├── go.sum
-└── main.go
+|-- cmd/                  Cobra commands and terminal output
+|   |-- add.go
+|   |-- clear.go
+|   |-- commands_test.go
+|   |-- delete.go
+|   |-- done.go
+|   |-- edit.go
+|   |-- id.go
+|   |-- list.go
+|   |-- root.go
+|   |-- table.go
+|   `-- version.go
+|-- internal/
+|   |-- storage/          JSON file storage
+|   |   |-- json.go
+|   |   `-- json_test.go
+|   `-- todo/             Todo model and operations
+|       |-- todo.go
+|       `-- todo_test.go
+|-- command/              Original manual-command example
+|-- flag-practice/        Standard-library flag example
+|-- go.mod
+|-- go.sum
+`-- main.go
 ```
 
-The Cobra implementation starts in `main.go`, with its commands, model, table,
-and storage helpers separated under `cmd/`. The original manual parser remains
+The Cobra implementation starts in `main.go`. The `cmd/` package handles CLI
+commands and output, `internal/todo/` contains todo behavior, and
+`internal/storage/` handles the JSON file. The original manual parser remains
 available as a standalone learning example in `command/`.
 
 ## Storage
 
 Tasks are loaded from and saved to `todos.json` in the current directory. The file is created after a command changes the task list.
+
+The Cobra commands use a concrete `storage.JSONStore`:
+
+```go
+var todoStore = storage.JSONStore{
+    FileName: "todos.json",
+}
+```
+
+`JSONStore.Load` reads the saved tasks, and `JSONStore.Save` writes them. Keeping
+this code in `internal/storage/` prevents file-handling details from becoming
+part of the Cobra commands or the todo model.
 
 Example:
 
@@ -216,6 +222,55 @@ Example:
   }
 ]
 ```
+
+## Package Responsibilities
+
+The application dependencies move in one direction:
+
+```text
+main -> cmd -> internal/storage -> internal/todo
+            `--------------------> internal/todo
+```
+
+- `main` starts the root Cobra command.
+- `cmd` parses commands, arguments, and flags, then prints results.
+- `internal/todo` contains the data model and operations such as `Add`,
+  `Complete`, `Edit`, and `Delete`.
+- `internal/storage` handles JSON encoding and file access.
+
+The `internal` packages do not import `cmd` or Cobra. This keeps todo behavior
+independent from the command-line interface.
+
+## When an Interface Would Be Useful
+
+The project currently uses the concrete `JSONStore`; it does not need an
+interface while JSON is the only storage option.
+
+An interface becomes useful if another backend is added, such as SQLite or an
+in-memory store for tests:
+
+```go
+type TodoStore interface {
+    Load() (todo.Todos, error)
+    Save(todo.Todos) error
+}
+```
+
+Both implementations could satisfy the same interface:
+
+```go
+var store TodoStore
+
+if useSQLite {
+    store = storage.SQLiteStore{Database: database}
+} else {
+    store = storage.JSONStore{FileName: "todos.json"}
+}
+```
+
+Cobra commands could then use `store.Load()` and `store.Save()` without knowing
+which storage backend was selected. In Go, an implementation satisfies an
+interface automatically when it provides the required methods.
 
 ## Installation
 
@@ -254,6 +309,8 @@ Todo Go is designed for learning and practicing:
 - Command-line arguments and flags
 - Cobra commands and command-specific flags
 - File I/O and JSON serialization
+- Package separation and dependency direction
+- When interfaces are useful
 - Error handling
 
 ## Status

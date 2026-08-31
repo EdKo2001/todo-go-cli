@@ -22,7 +22,7 @@ var editCmd = &cobra.Command{
 			return errors.New("new title cannot be empty")
 		}
 
-		todos, err := loadTodos()
+		todos, err := todoStore.Load()
 		if err != nil {
 			return err
 		}
@@ -31,7 +31,7 @@ var editCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if err := saveTodos(todos); err != nil {
+		if err := todoStore.Save(todos); err != nil {
 			return err
 		}
 

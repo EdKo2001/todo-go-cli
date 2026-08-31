@@ -12,7 +12,7 @@ var deleteCmd = &cobra.Command{
 			return err
 		}
 
-		todos, err := loadTodos()
+		todos, err := todoStore.Load()
 		if err != nil {
 			return err
 		}
@@ -21,7 +21,7 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if err := saveTodos(todos); err != nil {
+		if err := todoStore.Save(todos); err != nil {
 			return err
 		}
 

@@ -10,7 +10,7 @@ var listCmd = &cobra.Command{
 	Short: "List todo items",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		todos, err := loadTodos()
+		todos, err := todoStore.Load()
 		if err != nil {
 			return err
 		}

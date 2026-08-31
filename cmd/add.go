@@ -19,13 +19,13 @@ var addCmd = &cobra.Command{
 			return errors.New("todo title cannot be empty")
 		}
 
-		todos, err := loadTodos()
+		todos, err := todoStore.Load()
 		if err != nil {
 			return err
 		}
 
 		todo := todos.Add(title, due)
-		if err := saveTodos(todos); err != nil {
+		if err := todoStore.Save(todos); err != nil {
 			return err
 		}
 

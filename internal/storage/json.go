@@ -1,24 +1,28 @@
-package cmd
+package storage
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/EdKo2001/todo-go-cli/internal/todo"
 )
 
-var todoFileName = "todos.json"
+type JSONStore struct {
+	FileName string
+}
 
-func loadTodos() (Todos, error) {
-	fileData, err := os.ReadFile(todoFileName)
+func (store JSONStore) Load() (todo.Todos, error) {
+	fileData, err := os.ReadFile(store.FileName)
 	if errors.Is(err, os.ErrNotExist) {
-		return Todos{}, nil
+		return todo.Todos{}, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("read todos: %w", err)
 	}
 
-	var todos Todos
+	var todos todo.Todos
 	if err := json.Unmarshal(fileData, &todos); err != nil {
 		return nil, fmt.Errorf("decode todos: %w", err)
 	}
@@ -26,13 +30,13 @@ func loadTodos() (Todos, error) {
 	return todos, nil
 }
 
-func saveTodos(todos Todos) error {
+func (store JSONStore) Save(todos todo.Todos) error {
 	fileData, err := json.MarshalIndent(todos, "", "  ")
 	if err != nil {
 		return fmt.Errorf("encode todos: %w", err)
 	}
 
-	if err := os.WriteFile(todoFileName, fileData, 0644); err != nil {
+	if err := os.WriteFile(store.FileName, fileData, 0644); err != nil {
 		return fmt.Errorf("write todos: %w", err)
 	}
 

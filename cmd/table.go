@@ -5,9 +5,11 @@ import (
 	"io"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/EdKo2001/todo-go-cli/internal/todo"
 )
 
-func printTodos(output io.Writer, todos Todos) {
+func printTodos(output io.Writer, todos todo.Todos) {
 	if len(todos) == 0 {
 		fmt.Fprintln(output, "No todos found.")
 		return

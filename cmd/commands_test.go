@@ -5,15 +5,17 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/EdKo2001/todo-go-cli/internal/storage"
 )
 
 func TestStoredCommandFlow(t *testing.T) {
-	originalFileName := todoFileName
+	originalStore := todoStore
 	originalDue := due
 	originalListAll := listAll
 	originalListCompleted := listCompleted
 
-	todoFileName = filepath.Join(t.TempDir(), "todos.json")
+	todoStore = storage.JSONStore{FileName: filepath.Join(t.TempDir(), "todos.json")}
 	due = ""
 	listAll = false
 	listCompleted = false
@@ -27,7 +29,7 @@ func TestStoredCommandFlow(t *testing.T) {
 	clearCmd.SetOut(&output)
 
 	t.Cleanup(func() {
-		todoFileName = originalFileName
+		todoStore = originalStore
 		due = originalDue
 		listAll = originalListAll
 		listCompleted = originalListCompleted
@@ -68,7 +70,7 @@ func TestStoredCommandFlow(t *testing.T) {
 	if err := clearCmd.RunE(clearCmd, nil); err != nil {
 		t.Fatalf("clear todos: %v", err)
 	}
-	loaded, err := loadTodos()
+	loaded, err := todoStore.Load()
 	if err != nil {
 		t.Fatalf("load cleared todos: %v", err)
 	}
